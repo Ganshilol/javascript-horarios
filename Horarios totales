@@ -1,0 +1,46 @@
+function consultarFechasDesdeA3aA90() {
+  var planilla = SpreadsheetApp.getActiveSpreadsheet();
+  var hojaConsulta = planilla.getSheetByName("consulta");
+  
+  // La fecha buscada está siempre en B2
+  var fechaBuscada = hojaConsulta.getRange("B2").getValue();
+  
+  // Recorremos desde la fila 3 hasta la 95
+  for (var filaConsulta = 3; filaConsulta <= 95; filaConsulta++) {
+    var nombreHoja = hojaConsulta.getRange(filaConsulta, 1).getValue(); // Columna A
+    
+    if (!nombreHoja) {
+      continue; // si no hay nombre de hoja, pasa a la siguiente fila
+    }
+    
+    var hojaSeleccionada = planilla.getSheetByName(nombreHoja);
+    if (!hojaSeleccionada) {
+      hojaConsulta.getRange(filaConsulta, 3).setValue("La hoja '" + nombreHoja + "' no existe.");
+      continue;
+    }
+    
+    var rangoDatos = hojaSeleccionada.getRange("A1:I90").getValues();
+    var valorEncontrado = "";
+    
+    // Buscar coincidencia de la fecha en la hoja seleccionada
+    for (var f = 0; f < rangoDatos.length; f++) {
+      for (var c = 0; c < rangoDatos[f].length; c++) {
+        var textoCelda = rangoDatos[f][c];
+        if (textoCelda && textoCelda.toString().trim() === fechaBuscada.toString().trim()) {
+          if (f + 1 < rangoDatos.length) {
+            valorEncontrado = rangoDatos[f + 1][c];
+          }
+          break;
+        }
+      }
+      if (valorEncontrado !== "") break;
+    }
+    
+    // Escribir resultado en columna C de la misma fila
+    if (valorEncontrado === "") {
+      hojaConsulta.getRange(filaConsulta, 3).setValue("CERRADO");
+    } else {
+      hojaConsulta.getRange(filaConsulta, 3).setValue(valorEncontrado);
+    }
+  }
+}

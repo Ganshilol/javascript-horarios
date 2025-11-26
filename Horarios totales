@@ -1,4 +1,4 @@
-function consultarFechasDesdeA3aA90() {
+function consultarFechasTodas() {
   var planilla = SpreadsheetApp.getActiveSpreadsheet();
   var hojaConsulta = planilla.getSheetByName("consulta");
   
@@ -15,7 +15,7 @@ function consultarFechasDesdeA3aA90() {
     
     var hojaSeleccionada = planilla.getSheetByName(nombreHoja);
     if (!hojaSeleccionada) {
-      hojaConsulta.getRange(filaConsulta, 3).setValue("La hoja '" + nombreHoja + "' no existe.");
+      hojaConsulta.getRange(filaConsulta, 3).setValue("CERRADO");
       continue;
     }
     
@@ -27,8 +27,18 @@ function consultarFechasDesdeA3aA90() {
       for (var c = 0; c < rangoDatos[f].length; c++) {
         var textoCelda = rangoDatos[f][c];
         if (textoCelda && textoCelda.toString().trim() === fechaBuscada.toString().trim()) {
-          if (f + 1 < rangoDatos.length) {
-            valorEncontrado = rangoDatos[f + 1][c];
+          
+          // Empezamos desde la fila siguiente y seguimos bajando hasta encontrar un valor válido
+          var filaBusqueda = f + 1;
+          while (filaBusqueda < rangoDatos.length) {
+            var posibleValor = rangoDatos[filaBusqueda][c];
+            
+            if (posibleValor && !["VACACIONES","FRANCO"].includes(posibleValor.toString().trim().toUpperCase())) {
+              valorEncontrado = posibleValor;
+              break;
+            }
+            
+            filaBusqueda++;
           }
           break;
         }
